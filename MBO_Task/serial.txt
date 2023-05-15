@@ -1,0 +1,41 @@
+Lead - Weiatage
+
+1)remarks should vary on basis of manager 
+2)admin user can add upper and lower limit % calculation 
+
+1)weiatage
+2)Target
+3)Actual
+
+
+presale = status
+
+1)Open
+2)Close
+3)Active
+4)On-HOld
+
+
+-----------------------------16-03-2023------------
+Manager
+1)forgot password and create new account 
+2)Actual value should be editbale on same page
+3)remove add objective from manager login and alignmnet of objective form
+4)presale graph
+5)remove email option from manager and supervisor login
+6)After submitting objective form manager will not chnage value (manager needs supervisor approval)
+
+
+
+Supervisor
+1) total of mob_% , sum of weightage score and % achievement
+
+
+
+New enhancement
+1)sending auto email if any new MBO assigned to manager
+
+
+
+
+vendor - datatables - last file 54,3486

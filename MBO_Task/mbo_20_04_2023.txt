@@ -1,0 +1,14 @@
+current structure
+1)supervisor table
+2)manager table
+3)objective
+
+new structure
+1)role table
+2)employee table
+ a)empliyee id
+ b)employee name
+ c)role
+3)objective 
+4)objective template
+objecti

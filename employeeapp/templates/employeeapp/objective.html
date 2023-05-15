@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .sidebar .nav-item .collapse,
+      .sidebar .nav-item .collapsing {
+          margin: 0rem !important;
+      }
+      .sidebar {
+      width: 11rem !important;
+      }
+      .sidebar .nav-item .nav-link {
+      width: 11rem;
+  }
+      </style>
+</head>
+<body>
+    <table style="border: 1px solid black;">
+        <thead style="border: 1px solid black;">
+            <tr>
+                <th style="border: 1px solid black;">
+                    Objective Name
+                </th>
+                <th style="border: 1px solid black;">
+                    Measure Content
+                </th>
+                <th style="border: 1px solid black;">
+                    Target
+                </th>
+                <th style="border: 1px solid black;">
+                    Lead
+                </th>
+                <th style="border: 1px solid black;">
+                    Actual
+                </th>
+                <th style="border: 1px solid black;">
+                    Achieved
+                </th>
+                <th style="border: 1px solid black;">
+                    MBO Achievement
+                </th>
+                <th style="border: 1px solid black;">
+                    Weighted Score
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in data%}
+            <tr style="border: 1px solid black;">
+                <td style="border: 1px solid black;">
+                    {{i.objective_name}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.measure__content}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.target}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.lead}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.actual}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.achieved}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.mbo_achievement}}
+                </td>
+                <td style="border: 1px solid black;">
+                    {{i.weighted_score}}
+                </td>
+           </tr>
+           {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

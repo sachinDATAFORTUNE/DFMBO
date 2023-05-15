@@ -1,0 +1,8 @@
+1)Note - all the row should be in same status then and then only we will enable submit nutton
+2) add status accepted or rejected in maanger and supervisor both
+
+
+3)Enabling submit button for when all the objective get updated by manager or supervisor - will take time
+4)while adding objective measure should free text 
+
+4)cumulative weightage should not be more than 100 

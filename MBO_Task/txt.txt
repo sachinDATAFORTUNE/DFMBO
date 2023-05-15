@@ -1,0 +1,9 @@
+1)To accept objective by manager just add tick mark and if he rejects it has cross mark and then he can add comment there
+2)Weighted score should be in light green color
+3)If weightage crosses 100 we are going to show popup like weightage is crossing 100%
+4)Remove remarks column from objective table
+5)In manager dashboard add historical data where he can see the previous performance in bar graph
+6)Add one button in manager login where he can see MBO
+7)Copy objective and add objective should be on same page 
+
+

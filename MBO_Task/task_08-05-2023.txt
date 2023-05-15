@@ -1,0 +1,8 @@
+1)approve button should show when status is updated by supervisor - done 
+2)objective should not same for all the objective(it should not be default) - done
+3)when we creating template name objective should not get assign, it should be blank - done
+4)show user login name on page - done
+5)make side bar width 12 rem - done
+6)make footer title bold - done
+7)pass <a> tag from backend to fontend - 
+8)in supervisor login make one column action for updatde and delete objective - done
