@@ -302,10 +302,14 @@
                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Activity Log
                   </a>
+				  <a class="dropdown-item" href="{% url 'change_password_url' %}">
+                    <i class="fa fa-lock fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Reset Password
+                  </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item"
-                    href="#"
+                    href="{% url 'logout_view_url' %}"
                     data-toggle="modal"
                     data-target="#logoutModal"
                   >
@@ -345,6 +349,15 @@
                     style="max-width: 100%"
                   /><br />
                   <label class="control-label" for="objective"
+                  >Objective Subcategory:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="objective_subcategory"
+                  name="objective_subcategory"
+                  style="max-width: 100%"
+                /><br />
+                  <label class="control-label" for="objective"
                     >Measure:</label
                   >
 
@@ -368,7 +381,7 @@
                     {% endfor %}
                 </select>
                   <br />
-                  <label class="control-label" for="objective">Weightage:</label>
+                  <label class="control-label" for="objective">Weightage %:</label>
 
                   <input
                     type="text"
@@ -377,13 +390,31 @@
                     name="weightage"
                     style="max-width: 100%"
                     /><br />
-                  <label class="control-label" for="objective">Target:</label>
+                  <label class="control-label" for="objective">Target1:</label>
                   <br />
                   <input
                     type="text"
                     class="form-control"
-                    id="target"
-                    name="target"
+                    id="target1"
+                    name="target1"
+                    style="max-width: 100%"
+                  /><br />
+                  <label class="control-label" for="objective">Target2:</label>
+                  <br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="target2"
+                    name="target2"
+                    style="max-width: 100%"
+                  /><br />
+                  <label class="control-label" for="objective">Target3:</label>
+                  <br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="target3"
+                    name="target3"
                     style="max-width: 100%"
                   /><br />
                   <label class="control-label" for="objective">Upper percentage for weighted score calculation:</label>
@@ -393,6 +424,15 @@
                     class="form-control"
                     id="upper_percentage_for_weighted_score_calculation"
                     name="upper_percentage_for_weighted_score_calculation"
+                    style="max-width: 100%"
+                  /><br />
+                  <label class="control-label" for="objective">Medium percentage for weighted score calculation:</label>
+                  <br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="medium_percentage_for_weighted_score_calculation"
+                    name="medium_percentage_for_weighted_score_calculation"
                     style="max-width: 100%"
                   /><br />
                   <label class="control-label" for="objective">Lower percentage for weighted score calculation:</label>
@@ -475,7 +515,7 @@
             >
               Cancel
             </button>
-            <a class="btn btn-primary" href="login.html">Logout</a>
+            <a class="btn btn-primary" href="{% url 'logout_view_url' %}">Logout</a>
           </div>
         </div>
       </div>

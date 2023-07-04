@@ -12,18 +12,17 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import environ
+#import environ
 
 
 
-env = environ.Env(
+#env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, True)
-)
+    #DEBUG=(bool, True))
 # reading .env file
-environ.Env.read_env()
+#environ.Env.read_env()
 
-DEBUG = env('DEBUG')
+#DEBUG = env('DEBUG')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,7 +36,7 @@ SECRET_KEY = 'django-insecure-v%u0wkcfi*h0q*$w&ih9cf5iw4dgf7*7qs^!&x!dggld3ppdcy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [20.119.136.8]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -91,8 +90,18 @@ WSGI_APPLICATION = 'MBOProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+         
+        'ENGINE': 'django.db.backends.postgresql',
+
+        'NAME': 'DF_MBO',
+
+        'USER': 'postgres',
+
+        'PASSWORD': '12345',
+
+        'HOST': '',
+
+        'PORT': '5432',
     }
 }
 
@@ -116,8 +125,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-smtp_server_name = env('server_name')
-smtp_port = env('smtp_port')
+#smtp_server_name = env('server_name')
+#smtp_port = env('smtp_port')
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -135,6 +144,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST  = 'smtp.office365.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS= True
+EMAIL_HOST_USER = 'noreply@datafortune.com'
+EMAIL_HOST_PASSWORD = 'Fortune@2020'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')

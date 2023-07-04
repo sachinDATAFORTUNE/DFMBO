@@ -4,10 +4,10 @@ from .models import Measure, Objective, Manager, Supervisor, Presale, ObjectiveT
 # Register your models here.
 
 class ObjectiveAdminModel(admin.ModelAdmin):
-    list_display=("objective_name","target","weightage","actual","achieved","mbo_achievement","weighted_score","year","quarter","status")
+    list_display=("objective_name","target1","target2","target3","weightage","actual","achieved","mbo_achievement","weighted_score","year","quarter","status")
         
 class ObjectiveTemplateAdminModel(admin.ModelAdmin):
-    list_display=("objective_name","measure","target","weightage")
+    list_display=("objective_name","measure","target1","weightage")
         
 
 

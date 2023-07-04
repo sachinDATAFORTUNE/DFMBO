@@ -302,10 +302,14 @@
                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Activity Log
                   </a>
+				  <a class="dropdown-item" href="{% url 'change_password_url' %}">
+                    <i class="fa fa-lock fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Reset Password
+                  </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item"
-                    href="#"
+                    href="{% url 'logout_view_url' %}"
                     data-toggle="modal"
                     data-target="#logoutModal"
                   >
@@ -367,7 +371,7 @@
                     style="max-width: 100%"
                     value="{{object_template.weightage}}"
                     /><br />
-                  <label class="control-label" for="objective">Target:</label>
+                  <label class="control-label" for="objective">Target1:</label>
                   <br />
                    <input
                     type="text"
@@ -375,9 +379,29 @@
                     id="target"
                     name="target"
                     style="max-width: 100%"
-                    value="{{object_template.target}}"
+                    value="{{object_template.target1}}"
                   ><br />
-                  <!-- <label class="control-label" for="objective">Upper percentage for weighted score calculation:</label>
+				<label class="control-label" for="objective">Target2:</label>
+                  <br />
+                   <input
+                    type="text"
+                    class="form-control"
+                    id="target"
+                    name="target"
+                    style="max-width: 100%"
+                    value="{{object_template.target2}}"
+                  ><br />
+				<label class="control-label" for="objective">Target3:</label>
+                  <br />
+                   <input
+                    type="text"
+                    class="form-control"
+                    id="target"
+                    name="target"
+                    style="max-width: 100%"
+                    value="{{object_template.target3}}"
+                  ><br />
+                  <label class="control-label" for="objective">Upper percentage for weighted score calculation:</label>
                   <br />
                   <input
                     type="text"
@@ -385,16 +409,28 @@
                     id="upper_percentage_for_weighted_score_calculation"
                     name="upper_percentage_for_weighted_score_calculation"
                     style="max-width: 100%"
+					value="{{object_template.upper_percentage_for_weighted_score_calculation}}"
                   /><br />
-                  <label class="control-label" for="objective">Lower percentage for weighted score calculation:</label>
+                  <label class="control-label" for="objective">Medium percentage for weighted score calculation:</label>
                   <br />
                   <input
                     type="text"
                     class="form-control"
                     id="lower_percentage_for_weighted_score_calculation"
                     name="lower_percentage_for_weighted_score_calculation"
-                    style="max-width: 100%" -->
-                  <!-- /><br /> -->
+                    style="max-width: 100%"
+					value="{{object_template.medium_percentage_for_weighted_score_calculation}}"
+                  <br />
+				  <label class="control-label" for="objective">Lower percentage for weighted score calculation:</label>
+                  <br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="lower_percentage_for_weighted_score_calculation"
+                    name="lower_percentage_for_weighted_score_calculation"
+                    style="max-width: 100%"
+					value="{{object_template.lower_percentage_for_weighted_score_calculation}}"
+                  <br />
                   <a
                     class="nav-link collapsed"
                     href="{% url 'supervisor_url' %}"
@@ -466,7 +502,7 @@
             >
               Cancel
             </button>
-            <a class="btn btn-primary" href="login.html">Logout</a>
+            <a class="btn btn-primary" href="{% url 'logout_view_url' %}">Logout</a>
           </div>
         </div>
       </div>

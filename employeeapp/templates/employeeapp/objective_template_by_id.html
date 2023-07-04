@@ -284,10 +284,14 @@
                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Activity Log
                   </a>
+				  <a class="dropdown-item" href="{% url 'change_password_url' %}">
+                    <i class="fa fa-lock fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Reset Password
+                  </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item"
-                    href="#"
+                    href="{% url 'logout_view_url' %}"
                     data-toggle="modal"
                     data-target="#logoutModal"
                   >
@@ -318,6 +322,7 @@
       <thead>
         <tr style="background-color:#1e5796;color: white;">
           <th scope="col">Objective Name</th>
+		  <th>Objective Subcategory</th>
           <th scope="col">Measure</th>
           <th scope="col">Target</th>
           <th scope="col">Weightage</th>
@@ -328,8 +333,9 @@
         {% for i in template_objective%}
         <tr>
           <td>{{i.objective__objective_name}}</td>
+		  <td>{{i.objective__objective_subcategory}}</td>
           <td>{{i.objective__measure__content}}</td>
-          <td>{{i.objective__target}}</td>
+          <td>{{i.objective__target1}}</td>
           <td>
             {{i.objective__weightage}}%
           </td>
@@ -406,7 +412,7 @@
             >
               Cancel
             </button>
-            <a class="btn btn-primary" href="login.html">Logout</a>
+            <a class="btn btn-primary" href="{% url 'logout_view_url' %}">Logout</a>
           </div>
         </div>
       </div>

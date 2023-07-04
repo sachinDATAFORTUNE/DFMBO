@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from employeeapp import urls
+from django.contrib.auth import views as auth_views
 from .views import (supervisor_dashboard,get_objective,login_view,addmanager,
                     get_presale,forgot_password,presale_for_manager_view,manager_mbo,presale_for_supervisor_view,
                     get_mbo, register, update_manager_objective_view,
@@ -8,7 +9,7 @@ from .views import (supervisor_dashboard,get_objective,login_view,addmanager,
                     delete_manager,updating_objective_status_after_submitting_info_by_manager,updateManager,delete_objective,
                     sending_objective_to_manager,approving_objective_by_supervisor,accepted_objective_by_manager,rejected_objective_by_manager,create_copy_objective_view,
                     copy_of_objective,updating_objective_status_if_manager_rejects_it,updating_objective_status_if_manager_accepts_it,manager_dashboard,objective_template,
-                    objective_template_by_id,delete_objective_template_by_ID,delete_template,create_template,add_objective_in_template,edit_objective_template_by_ID)
+                    objective_template_by_id,delete_objective_template_by_ID,delete_template,create_template,add_objective_in_template,edit_objective_template_by_ID,logout_view)
 
 urlpatterns = [
     path('addmanager', addmanager, name='add_manager_url'),
@@ -47,4 +48,14 @@ urlpatterns = [
     path('create_template',create_template,name='create_template_url'),
     path('<id>/add_objective_in_template',add_objective_in_template,name='add_objective_in_template_url'),
     path('edit_objective_template_by_ID/<template_id>/<objective_id>',edit_objective_template_by_ID,name='edit_objective_template_by_ID_url'),
+    path('logout',logout_view,name='logout_view_url'),
+     # Change Password
+    path(
+        'change-password/',
+        auth_views.PasswordChangeView.as_view(
+            template_name='employeeapp/change-password.html',
+            success_url = 'mbo_url'
+        ),
+        name='change_password_url'
+    ),
 ]

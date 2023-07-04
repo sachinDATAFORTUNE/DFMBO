@@ -304,10 +304,14 @@
                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Activity Log
                   </a>
+				  <a class="dropdown-item" href="{% url 'change_password_url' %}">
+                    <i class="fa fa-lock fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Reset Password
+                  </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item"
-                    href="#"
+                    href="{% url 'logout_view_url' %}"
                     data-toggle="modal"
                     data-target="#logoutModal"
                   >
@@ -347,27 +351,44 @@
                           <td>
                             <b>
                             <a style="color:#1e5796"
-                              href="{% url 'supervisor_manager_mbo_url'  user_id=i.user_id %}"
-                              >{{i.employee_id}}</a>
+                              href="{% url 'supervisor_manager_mbo_url'  user_id=i.6 %}"
+                              >{{i.0}}</a>
                             </b>
                           </td>
-                          <td>{{i.user__username}}</td>
+                          <td>{{i.1}}</td>
                           <td>Manager</td>
-                          <td>{{i.first_quarter}}%</td>
                           <td>
-                            {{i.second_quarter}}%
+                            {% if i.2 == None %}
+                            0%
+                            {% else %}
+                            {{i.2}}%
+                            {% endif %}
                           </td>
                           <td>
-                            {{i.third_quarter}}%
+                            {% if i.3 == None %}
+                            0%
+                            {% else %}
+                            {{i.3}}%
+                            {% endif %}
                           </td>
                           <td>
-                            {{i.fourth_quarter}}%
+                            {% if i.4 == None %}
+                            0%
+                            {% else %}
+                            {{i.4}}%
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if i.5 == None %}
+                            0%
+                            {% else %}
+                            {{i.5}}%
+                            {% endif %}
                           </td>
                         <td>
                           <!-- <form method="delete"> -->
-                            <a href="update_manager/{{ i.user_id }}"><i class="fa fa-edit" style="color:black; font-size: 16px;"></i></a>
                           <!-- </form> -->
-                        <a href="deleteManager/{{ i.user_id }}"><i class="fa fa-trash" style="color:brown; font-size: 16px;"></i></a>
+                        <a href="deleteManager/{{ i.6 }}"><i class="fa fa-trash" style="color:brown; font-size: 16px;"></i></a>
                     </td>
                         </tr>
                         {% endfor %}
@@ -423,7 +444,7 @@
             >
               Cancel
             </button>
-            <a class="btn btn-primary" href="login.html">Logout</a>
+            <a class="btn btn-primary" href="{% url 'logout_view_url' %}">Logout</a>
           </div>
         </div>
       </div>

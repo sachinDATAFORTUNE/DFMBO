@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 from fiscalyear import *
+from django.db.models import Q
 import math
 # Create your models here.
 
@@ -76,17 +77,21 @@ class Objective(models.Model):
         )
     objective_id = models.AutoField(primary_key=True)
     objective_name = models.CharField(max_length=200)
+    objective_subcategory = models.CharField(max_length=200,blank=True)
     measure = models.ForeignKey("Measure",on_delete=models.CASCADE)
     manager = models.ForeignKey("Manager",on_delete=models.CASCADE)
     # manager = models.OneToOneField(User, on_delete=models.CASCADE,blank=True,null=True)
-    target = models.IntegerField(blank=True, default=0)
+    target1 = models.IntegerField(blank=True, default=0)
+    target2 = models.IntegerField(blank=True, default=0)
+    target3 = models.IntegerField(blank=True, default=0)
     weightage = models.IntegerField(blank=True, default=0)
     actual = models.IntegerField(blank=True, default=0)
     final = models.IntegerField(blank=True, default=0)
     achieved = models.IntegerField(blank=True, default=0)
-    mbo_achievement = models.IntegerField(blank=True, default=0)
-    weighted_score = models.IntegerField(blank=True, default=0)
+    mbo_achievement = models.IntegerField(blank=True, default=None)
+    weighted_score = models.IntegerField(blank=True, default=None)
     lower_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=70)
+    medium_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=80)
     upper_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=120)
     year = models.IntegerField(default=0)
     quarter = models.IntegerField(default=0)
@@ -97,26 +102,78 @@ class Objective(models.Model):
     
     def save(self, *args, **kwargs):
         now = datetime.datetime.now()
-        if self.final != 0:
-            achievded = (self.final/self.target)*100
-        else:
-            achievded = int(self.actual/self.target)*100
-        if self.final != 0:
-            mbo_achievement = (self.final/self.target)*100
-        else:
-            mbo_achievement = (self.actual/self.target)*100
+        mbo_achievement=0
+        achievded=0
+        if self.target1 != 0:
+            if self.final != 0:
+                achievded = (self.final/self.target1)*100
+            else:
+                achievded = (self.actual/self.target1)*100
+            if self.final != 0:
+                mbo_achievement = (self.final/self.target1)*100
+            else:
+                mbo_achievement = (self.actual/self.target1)*100
+        if self.target1 == 0 and self.status in ["Updated-By-Manager", "Sent-To-Supervisor","Updated-By-Supervisor","Approved"]:
+            if self.actual == 0 and self.final==0:
+                mbo_achievement = 100
+                achievded = 100
+            elif (self.actual < self.target2 or self.final < 0) and (self.actual < self.target2 or self.final < self.target2):
+                calculation = ((self.target2 - self.actual)/self.target2)*(self.upper_percentage_for_weighted_score_calculation - self.medium_percentage_for_weighted_score_calculation)
+                mbo_achievement = calculation + self.medium_percentage_for_weighted_score_calculation
+                achievded = calculation + self.medium_percentage_for_weighted_score_calculation
+            elif (self.actual == self.target2 or self.final == 0) and (self.actual == self.target2 or self.final == self.target2):
+                mbo_achievement = self.medium_percentage_for_weighted_score_calculation
+                achievded = self.medium_percentage_for_weighted_score_calculation
+            elif self.actual > self.target2 or self.final > self.target2:
+                mbo_achievement = 0
+                achievded = 0
+        # if "Zero account closure due to delivery" in str(self.measure):
+        #     if self.status in ["Updated-By-Manager", "Sent-To-Supervisor","Updated-By-Supervisor","Approved"]:
+        #         if self.actual == 0 and self.final==0:
+        #             mbo_achievement = 120
+        #             achievded = 120
+        #         elif self.actual == 1 and self.final==1:
+        #             mbo_achievement = 0
+        #             achievded = 0
+        #         elif self.actual == 0 and self.final==1:
+        #             mbo_achievement = 0
+        #             achievded = 0
+        # if "No escalations for delivery" in str(self.measure):
+        #     if self.status in ["Updated-By-Manager", "Sent-To-Supervisor","Updated-By-Supervisor","Approved"]:
+        #         if self.actual == 0 and self.final==0:
+        #             mbo_achievement = 100
+        #             achievded = 100
+        #         elif self.actual == 1 and self.final == 1:
+        #             mbo_achievement = 50
+        #             achievded = 50
+        #         elif self.actual == 0 and self.final == 1:
+        #             mbo_achievement = 50
+        #             achievded = 50
+        #         elif self.actual > 1 or self.final > 1:
+        #             mbo_achievement = 0
+        #             achievded = 0
+        #         elif self.actual == 0 or self.final > 1:
+        #             mbo_achievement = 0
+        #             achievded = 0
         if mbo_achievement>self.upper_percentage_for_weighted_score_calculation:
             mbo_achievement=120
         elif mbo_achievement<self.lower_percentage_for_weighted_score_calculation:
             mbo_achievement=0
+        #if "Attrition Less than 10% team size in 6 months" in self.measure.lower():
+            #if self.actual == 0:
+                #mbo_achievement = 100
+            #elif self.actual == 1:
+                #mbo_achievement = 50
+            #elif self.actual > 1:
+                #mbo_achievement = 0
         self.achieved = achievded
         self.mbo_achievement = mbo_achievement
         weighted_score = int(self.weightage)*mbo_achievement/100
         self.weighted_score = weighted_score
         current_fiscale_date = FiscalDate.today()
-        # self.year = current_fiscale_date.fiscal_year
+        self.year = current_fiscale_date.fiscal_year
         current_month=now.month
-        quarter=0
+        quarter=0                
         if current_month in [1,2,3]:
             quarter=4
         elif current_month in [4,5,6]:
@@ -125,7 +182,7 @@ class Objective(models.Model):
             quarter=2
         if current_month in [10,11,12]:
             quarter=3
-        # self.quarter = quarter
+        self.quarter = quarter
         super(Objective, self).save(*args, **kwargs)
 
     
@@ -169,11 +226,17 @@ class Role(models.Model):
 class ObjectiveTemplate(models.Model):
     objective_id = models.AutoField(primary_key=True)
     objective_name = models.CharField(max_length=200)
+    objective_subcategory = models.CharField(max_length=200,blank=True)
     measure = models.ForeignKey("Measure",on_delete=models.CASCADE)
     role = models.ForeignKey("Role",on_delete=models.CASCADE)
     # manager = models.ForeignKey("Manager",on_delete=models.CASCADE)
-    target = models.IntegerField(blank=True, default=0)
+    target1 = models.IntegerField(blank=True, default=0)
+    target2 = models.IntegerField(blank=True, default=0)
+    target3 = models.IntegerField(blank=True, default=0)
     weightage = models.IntegerField(blank=True, default=0)
+    lower_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=70)
+    medium_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=90)
+    upper_percentage_for_weighted_score_calculation = models.IntegerField(blank=True, default=120)
         
     def __str__(self):
         return self.objective_name

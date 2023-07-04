@@ -321,8 +321,12 @@
                                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Activity Log
                                 </a>
+								<a class="dropdown-item" href="{% url 'change_password_url' %}">
+                    <i class="fa fa-lock fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Reset Password
+                  </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="{% url 'logout_view_url' %}" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -514,6 +518,7 @@
                                     <thead>
                                         <tr style="color: white; background-color: #1e5796;">
                                             <th>Objective</th>
+                                            <th>Objective Subcategory</th>
                                             <th>Measure</th>
                                             <th>Weightage</th>
                                             <th>Target</th>
@@ -533,6 +538,7 @@
                                         <td>
 
                                         </td>
+										<td></td>
                                         <td>
                                             <b>{{weightage_sum}}%</b>
                                         </td>
@@ -569,14 +575,18 @@
                                                 {{i.objective_name}}
                                             </td>
                                             <td>
+                                                {{i.objective_subcategory}}
+                                            </td>
+                                            <td>
                                                 {{i.measure__content}}
                                             </td>
                                             <td>
                                                 {{i.weightage}}%
                                             </td>
                                             <td>
-                                                {{i.target}}
+                                                {{i.target1}}
                                             </td>
+											
                                             <td>
                                                 <a href="#" data-toggle="modal"
                                                     data-target="#myModal5" class="anchortag" onclick="getObjectID('{{i.objective_id}}')">
@@ -728,7 +738,7 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <a class="btn btn-primary" href="{% url 'logout_view_url' %}">Logout</a>
                 </div>
             </div>
         </div>

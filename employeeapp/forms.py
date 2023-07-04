@@ -14,13 +14,13 @@ class ObjectiveFormForManager(ModelForm):
 class ObjectiveFormForSupervisor(ModelForm):
     class Meta:
         model = Objective
-        fields = ["objective_name","weightage","measure","target","actual","final","upper_percentage_for_weighted_score_calculation","lower_percentage_for_weighted_score_calculation","year","quarter"]
+        fields = ["objective_name","weightage","measure","target1","target2","target3","actual","final","upper_percentage_for_weighted_score_calculation","lower_percentage_for_weighted_score_calculation","year","quarter"]
  
         
 class AddObjectiveForm(ModelForm):
     class Meta:
         model = Objective
-        fields = ["objective_name","measure","target","weightage"]
+        fields = ["objective_name","measure","target1","weightage"]
         
                 
 class MeasureForm(ModelForm):

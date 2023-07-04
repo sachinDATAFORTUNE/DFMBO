@@ -18,6 +18,10 @@ from .SMTP import sending_mail
 from fiscalyear import *
 import pandas as pd
 import json
+from django.contrib.auth import logout
+from django.db import connection
+from django.conf import settings
+from django.core.mail import send_mail
 
 # Create your views here.
 def login_view(request):
@@ -41,15 +45,19 @@ def login_view(request):
         return redirect('login_url')
     else:
         return render(request, 'employeeapp/login.html')
+        
+def logout_view(request):
+    logout(request)
+    return redirect('login_url')
 
 def update_manager_objective_view(request,object_id):
     username = request.user.username
     object = Objective.objects.get(pk=object_id)
     status = object.status
     actual = object.actual
-    if status not in ["Accepted"]:
+    if status not in ["Accepted","Updated-By-Manager"]:
         return redirect("manager_mbo_url")
-    elif status in ["Accepted"]:
+    elif status in ["Accepted","Updated-By-Manager"]:
         if request.method=="POST":
             actual = request.POST["actual"]
             object_by_filter = Objective.objects.filter(pk=object_id)
@@ -82,9 +90,8 @@ def update_supervisor_objective_view(request,object_id,user_id):
         quarter=3
     weightage_sum = Manager.objects.filter(user_id=user_id,objective__year=year,objective__quarter=quarter).annotate(weighted_score_sum=Sum('objective__weightage')).values("weighted_score_sum")
     sum = weightage_sum[0]["weighted_score_sum"]
-    if status in ["Sent-To-Supervisor","Created","Sent-To-Supervisor-After-Rejecting"]:
+    if status in ["Sent-To-Supervisor","Created","Sent-To-Supervisor-After-Rejecting","Updated-By-Supervisor"]:
         if request.method=="POST":
-            print("its coming in second if")
             objective_name = request.POST["objective_name"]
             measure_content = request.POST["measure"]
             weightage = request.POST["weightage"]
@@ -101,7 +108,7 @@ def update_supervisor_objective_view(request,object_id,user_id):
             measure1, created = Measure.objects.get_or_create(content=measure_content)
             measure = Measure.objects.get(content=measure1)
             object_by_filter = Objective.objects.filter(pk=object_id)
-            if status == "Sent-To-Supervisor":
+            if status in ["Updated-By-Supervisor","Sent-To-Supervisor"]:
                 for i in object_by_filter:
                     i.objective_name=objective_name
                     i.measure=measure
@@ -197,58 +204,42 @@ def supervisor_dashboard(request):
     list_of_labels =[]
     for i in year_quarter[0]:
         weightage_sum = Manager.objects.filter(supervisor_id__user_id=request.user.id,objective__year=i[0],objective__quarter=i[1]).annotate(weighted_score_sum=Sum('objective__weighted_score')).values("weighted_score_sum")
-        # print(weightage_sum,"*********************************************")
-        # print(weightage_sum,"****************************************************")
         if weightage_sum.exists():
             sum = weightage_sum[0]["weighted_score_sum"]
             list_of_data_values.append(sum)
         if i[1]==4:
             list_of_labels.append(f"Jan{str(i[0])[-2:]}-March{str(i[0])[-2:]}")
-            # first = Manager.objects.filter(supervisor_id__user_id=user_id,flag="Added",year=i[1],quarter=i[0])
         elif i[1]==1:
             list_of_labels.append(f"April{str(i[0])[-2:]}-Jun{str(i[0])[-2:]}")
-            # second = Manager.objects.filter(supervisor_id__user_id=user_id,flag="Added",year=i[1],quarter=i[0])
         elif i[1]==2:
             list_of_labels.append(f"July{str(i[0])[-2:]}-Sept{str(i[0])[-2:]}")
         elif i[1]==3:
             list_of_labels.append(f"Oct{str(i[0])[-2:]}-Dec{str(i[0])[-2:]}")
-    # supervisor_list = Manager.objects.filter(supervisor_id=2)
-    first = Manager.objects.filter(supervisor_id__user_id=user_id,objective__year=year_quarter[0][0][0],objective__quarter=year_quarter[0][0][1]).annotate(first=Sum('objective__weighted_score')).values("first")
-    # first = Objective.objects.filter(quarter=year_quarter[0][0][1],year=year_quarter[0][0][0]).annotate(first_quarter=Sum("weighted_score")).values('first_quarter')
-    second = Manager.objects.filter(supervisor_id__user_id=user_id,objective__year=year_quarter[0][1][0],objective__quarter=year_quarter[0][1][1]).annotate(second=Sum('objective__weighted_score')).values("second")
-    # second = Objective.objects.filter(quarter=year_quarter[0][1][1],year=year_quarter[0][1][0]).annotate(first_quarter=Sum("weighted_score")).values('second_quarter')
-    third = Manager.objects.filter(supervisor_id__user_id=user_id,objective__year=year_quarter[0][2][0],objective__quarter=year_quarter[0][2][1]).annotate(third=Sum('objective__weighted_score')).values("third")
-    # third = Objective.objects.filter(quarter=year_quarter[0][2][1],year=year_quarter[0][2][0]).annotate(first_quarter=Sum("weighted_score")).values('first_quarter')
-    fourth = Manager.objects.filter(supervisor_id__user_id=user_id,objective__year=year_quarter[0][3][0],objective__quarter=year_quarter[0][3][1]).annotate(fourth=Sum('objective__weighted_score')).values("fourth")
-    # fourth = Objective.objects.filter(quarter=year_quarter[0][3][1],year=year_quarter[0][3][0]).annotate(first_quarter=Sum("weighted_score")).values('first_quarter')
-    # print(first,second,third,fourth,"#########################################################################")
-    # print(year_quarter,"######################################################################")
-    # data = Manager.objects.filter(supervisor_id__user_id=user_id,flag="Added")\
-    #             .annotate(quarter_first=Subquery(first))\
-    #             .annotate(quarter_second=Subquery(second))\
-    #             .annotate(quarter_third=Subquery(third))\
-    #             .annotate(quarter_fourth=Subquery(fourth))\
-    #             .values("user_id","employee_id","user__username","user__email","quarter_first","quarter_second","quarter_third","quarter_fourth")
-    data = Manager.objects.filter(supervisor_id__user_id=user_id,flag="Added",objective__year=year_quarter[0][0][0],objective__quarter=year_quarter[0][0][1])\
-                .annotate(first_quarter=Sum('objective__weighted_score')).values("user_id","employee_id","user__username","user__email","first_quarter")
-                # .annotate(second_quarter=Sum('objective__weighted_score'))\
-                # .annotate(third_quarter=Sum('objective__weighted_score'))\
-                # .annotate(fourth_quarter=Sum('objective__weighted_score'))\
-    # print(first,"firstttttttttttttttttttttttttttttttttttttttttttttttttttttt")
-    # print(second,"secondddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-    # print(third,"Thirddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-    # print(fourth,"fourthhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
-    data_list = []
-    for i in data:
-        data_list.append(i)
-    data1 = first.union(second).union(third).union(fourth)
-    print(data,"****************************************************************")
-    # one = data.filter(objective__year=year_quarter[0][1][0],objective__quarter=year_quarter[0][1][1])
-    # for i in data:
-    #     print(data,"********************************")
-            # data = Manager.objects.filter(supervisor_id__user_id=user_id,flag="Added").annotate(first=Manager.objects.filter).values("user_id","employee_id","user__username")
-    # print(data,"****************************************************************")
-    return render(request, "employeeapp/supervisor.html", {"labels":list_of_labels,"first":first,"username":username,"data":data,"user_id":user_id})
+    raw_query = f"""
+    select employee_id,
+    (
+            select username from auth_user where id = employeeapp_manager.user_id
+        ) as username,(
+        select ROUND(SUM(weighted_score)) from employeeapp_objective where year={year_quarter[0][0][0]} and quarter={year_quarter[0][0][1]} and manager_id = employeeapp_manager.id
+        ) as q1_SUM_weighted_score,
+        (
+        select ROUND(SUM(weighted_score)) from employeeapp_objective where year={year_quarter[0][1][0]} and quarter={year_quarter[0][1][1]} and manager_id = employeeapp_manager.id
+        ) as q2_SUM_weighted_score,
+        (
+        select ROUND(SUM(weighted_score)) from employeeapp_objective where year={year_quarter[0][2][0]} and quarter={year_quarter[0][2][1]} and manager_id = employeeapp_manager.id
+        ) as q3_SUM_weighted_score,
+        (
+        select ROUND(SUM(weighted_score)) from employeeapp_objective where year={year_quarter[0][3][0]} and quarter={year_quarter[0][3][1]} and manager_id = employeeapp_manager.id
+        ) as q4_SUM_weighted_score,
+        user_id
+        from employeeapp_manager where flag='Added'
+    """
+    raw_query = raw_query + ";"
+    cursor = connection.cursor()
+    cursor.execute(raw_query)
+    row = cursor.fetchall()
+    print(row,"This is row")
+    return render(request, "employeeapp/supervisor.html", {"labels":list_of_labels,"username":username,"data":row,"user_id":user_id})
 
 
 def get_objective(request):
@@ -290,6 +281,9 @@ def addmanager(request):
             supervisor = Supervisor.objects.get(user_id=request.user.id)
             manager = Manager.objects.create(employee_id=employee_id,user=create_user,supervisor=supervisor,flag="Added")
             manager.save()
+            email=[email]
+            password=password.replace(" ","")
+            send_forget_password_mail(email, username,employee_name, password)
             return redirect("supervisor_url")
     return render(request, "employeeapp/addmanager.html",{"username":username})
 
@@ -359,8 +353,8 @@ def manager_mbo(request):
                 quarter = 3
             elif quarter == "Jan-Mar":
                 quarter = 4
-    data = Objective.objects.filter(manager__user_id=user_id,year=year,quarter=quarter).values("objective_id","objective_name",
-                                                                    "measure__content","target",
+    data = Objective.objects.filter(manager__user_id=user_id,year=year,quarter=quarter).order_by('objective_name').values("objective_id","objective_name","objective_subcategory",
+                                                                    "measure__content","target1","target2","target3",
                                                                     "weightage","actual","achieved",
                                                                     "mbo_achievement","weighted_score","final",
                                                                     "lower_percentage_for_weighted_score_calculation",
@@ -445,8 +439,8 @@ def supervisor_manager_mbo(request,user_id):
         sum_of_weightage = weightage_sum[0]["weighted_score_sum"]
     else:
         sum_of_weightage=0
-    data = Objective.objects.filter(manager__user_id=user_id,year=year,quarter=quarter).values("objective_id","objective_name",
-                                                                "measure__content","target",
+    data = Objective.objects.filter(manager__user_id=user_id,year=year,quarter=quarter).order_by('objective_name').values("objective_id","objective_name","objective_subcategory",
+                                                                "measure__content","target1","target2","target3",
                                                                 "weightage","actual","final","achieved",
                                                                 "mbo_achievement","weighted_score","status","comment")
     sum = Manager.objects.filter(user_id=user_id,objective__year=year,objective__quarter=quarter).annotate(weightage_sum=Sum('objective__weightage')).\
@@ -476,42 +470,18 @@ def supervisor_manager_mbo(request,user_id):
     return render(request, "employeeapp/supervisor_manager_mbo.html", 
                 {"data":data,"username":username,"weighted_score_sum":weighted_score_sum,"achieved_sum":achieved_sum,
                 "weightage_sum":weightage_sum,"mbo_achievement_sum":mbo_achievement_sum,"user_id":user_id,"year":list_of_year,"quarter":list_of_quarter,"number":number,"year1":year,"quarter1":quarter,"sum":sum_of_weightage,"approve_button":approve_button})
-    # data = Objective.objects.filter(user_id__user_id=user_id,year=year,quarter=quarter).values("objective_id","objective_name",
-    #                                                                 "measure__content","target",
-    #                                                                 "weightage","actual","final","achieved",
-    #                                                                 "mbo_achievement","weighted_score","status")
-    # sum = Manager.objects.filter(user_id=user_id,objective__year=year,objective__quarter=quarter).annotate(weightage_sum=Sum('objective__weightage')).\
-    #     annotate(weighted_score_sum=Sum('objective__weighted_score')).annotate(achieved_sum=Round(Avg('objective__achieved'))).\
-    #     annotate(mbo_achievement_sum=Avg('objective__mbo_achievement')).values("weightage_sum","weighted_score_sum","achieved_sum","mbo_achievement_sum")
-    # if not data:
-    #     weighted_score_sum = ""
-    #     weightage_sum = ""
-    #     achieved_sum = ""
-    #     mbo_achievement_sum = ""
-    # else:
-    #     for i in sum:
-    #             if i["weighted_score_sum"] != None and i["weightage_sum"] != None and i["achieved_sum"] != None and i["mbo_achievement_sum"] != None:
-    #                 weighted_score_sum = i["weighted_score_sum"]
-    #                 weightage_sum = i["weightage_sum"]
-    #                 achieved_sum = i["achieved_sum"]
-    #                 mbo_achievement_sum = i["mbo_achievement_sum"]
-    #             else:
-    #                 weighted_score_sum = ""
-    #                 weightage_sum = ""
-    #                 achieved_sum = ""
-    #                 mbo_achievement_sum = ""
-    # return render(request, "employeeapp/supervisor_manager_mbo.html", 
-    #             {"data":data,"weighted_score_sum":weighted_score_sum,"achieved_sum":achieved_sum,
-    #             "weightage_sum":weightage_sum,"mbo_achievement_sum":mbo_achievement_sum,"user_id":user_id,"year":list_of_year,"quarter":list_of_quarter,"number":number})
 def addobjective_view(request):
     username = request.user.username
     manager_queryset = Manager.objects.all()
     sum_of_weightage = 0
     if request.method=="POST":
         objective_name = request.POST["objective_name"]
+        objective_subcategory = request.POST["objective_subcategory"]
         measure_content = request.POST["measure"]
         weightage = request.POST["weightage"]
-        target = request.POST["target"]
+        target1 = request.POST["target1"]
+        target2 = request.POST["target2"]
+        target3 = request.POST["target3"]
         user_id = request.POST["manager"]
         upper_percentage_for_weighted_score_calculation = request.POST["upper_percentage_for_weighted_score_calculation"]
         lower_percentage_for_weighted_score_calculation = request.POST["lower_percentage_for_weighted_score_calculation"]
@@ -524,7 +494,7 @@ def addobjective_view(request):
         #     sum_of_weightage = weightage_sum[0]["weighted_score_sum"] + int(weightage)
         # else:
         #     sum_of_weightage = int(weightage)
-        Objective.objects.create(objective_name=objective_name,measure=measure,manager=manager,weightage=weightage,target=int(target),upper_percentage_for_weighted_score_calculation=int(upper_percentage_for_weighted_score_calculation),
+        Objective.objects.create(objective_name=objective_name,objective_subcategory=objective_subcategory,measure=measure,manager=manager,weightage=weightage,target1=int(target1),target2=int(target2),target3=int(target3),upper_percentage_for_weighted_score_calculation=int(upper_percentage_for_weighted_score_calculation),
             lower_percentage_for_weighted_score_calculation=int(lower_percentage_for_weighted_score_calculation),status="Created")
         return render(request, 'employeeapp/addobjective.html',{"manager":manager_queryset})
     return render(request, 'employeeapp/addobjective.html',{"manager":manager_queryset,"username":username})
@@ -665,7 +635,10 @@ def approving_objective_by_supervisor(request, user_id):
         quarter=3
     data = Objective.objects.filter(Q(status="Updated-By-Supervisor"),manager__user_id=user_id,year=year,quarter=quarter)
     for i in data:
-        if i.final !=0:
+        if str(i.measure) in ["No escalations for delivery","Zero account closure due to delivery"]:
+            i.status = "Approved"
+            i.save()
+        elif i.final !=0:
             i.status = "Approved"
             i.save()
     # data.update(status="Approved")
@@ -765,11 +738,17 @@ def copy_of_objective(request):
         for i in template:
             list_of_objective_template.append(i["objective__objective_id"])
         for i in list_of_objective_template:
+            print(i,"This is from iiiiiiiiiiiiiiiiiiiiiiiiiii")
             objective = ObjectiveTemplate.objects.get(objective_id=i)
             manager = Manager.objects.get(user__id=manager_id)
             Objective.objects.create(objective_name=objective.objective_name,
-                                     measure=objective.measure,target=objective.target,
-                                     weightage=objective.weightage,manager=manager)
+                                     objective_subcategory=objective.objective_subcategory,
+                                     measure=objective.measure,target1=objective.target1,
+                                     target2=objective.target2,target3=objective.target3,
+                                     weightage=objective.weightage,manager=manager,
+                                     lower_percentage_for_weighted_score_calculation=objective.lower_percentage_for_weighted_score_calculation,
+                                     medium_percentage_for_weighted_score_calculation=objective.medium_percentage_for_weighted_score_calculation,
+                                     upper_percentage_for_weighted_score_calculation=objective.upper_percentage_for_weighted_score_calculation)
         # print(list_of_objective_template,"*******************************************************")
         # data = Objective.objects.filter(manager__user_id=user_id1,year=year,quarter=quarter)
         # manager2 = Manager.objects.get(user_id=user_id2)
@@ -900,8 +879,8 @@ def objective_template(request):
 def objective_template_by_id(request,id):
     username = request.user.username
     # template = Template.objects.filter(id=id).values_list("objective__objective_name","objective__role","objective__target","objective__weightage")
-    template = Template.objects.filter(id=id).values("template_name","objective__objective_id","objective__objective_name","objective__measure__content","objective__target","objective__weightage")
-    template_objective = ObjectiveTemplate.objects.filter(role__role="Manager").values("objective_id","objective_name","measure__content","target","weightage")
+    template = Template.objects.filter(id=id).values("template_name","objective__objective_id","objective__objective_name","objective__objective_subcategory","objective__measure__content","objective__target1","objective__target2","objective__target3","objective__weightage")
+    # template_objective = ObjectiveTemplate.objects.filter(role__role="Manager").values("objective_id","objective_name","measure__content","target","weightage")
     return render(request,"employeeapp/objective_template_by_id.html",{"template_name":template[0].get("template_name"),"template_id":id,"username":username,"template_objective":template})
 
 def create_template(request):
@@ -952,14 +931,24 @@ def add_objective_in_template(request,id):
     username = request.user.username
     if request.method=="POST":
         objective_name = request.POST["objective_name"]
+        objective_subcategory = request.POST["objective_subcategory"]
         measure_content = request.POST["measure"]
         weightage = request.POST["weightage"]
-        target = request.POST["target"]
+        target1 = request.POST["target1"]
+        target2 = request.POST["target2"]
+        target3 = request.POST["target3"]
+        upper_percentage_for_weighted_score_calculation = request.POST["upper_percentage_for_weighted_score_calculation"]
+        medium_percentage_for_weighted_score_calculation = request.POST["medium_percentage_for_weighted_score_calculation"]
+        lower_percentage_for_weighted_score_calculation = request.POST["lower_percentage_for_weighted_score_calculation"]
         measure1, created = Measure.objects.get_or_create(content=measure_content)
         measure = Measure.objects.get(content=measure1)
         role1, role_created = Role.objects.get_or_create(role="Manager")
         role = Role.objects.get(role=role1)
-        objective = ObjectiveTemplate.objects.create(objective_name=objective_name,measure=measure,role=role,weightage=weightage,target=int(target),)
+        objective = ObjectiveTemplate.objects.create(objective_name=objective_name,objective_subcategory=objective_subcategory,measure=measure,role=role,weightage=weightage,
+                                                     target1=int(target1),target2=int(target2),target3=int(target3),
+                                                     upper_percentage_for_weighted_score_calculation=int(upper_percentage_for_weighted_score_calculation),
+                                                    medium_percentage_for_weighted_score_calculation=int(medium_percentage_for_weighted_score_calculation),
+                                                    lower_percentage_for_weighted_score_calculation=int(lower_percentage_for_weighted_score_calculation))
         template = Template.objects.filter(id=id).values("objective__objective_id")
         list_of_objective_ids=[]
         for i in template:
@@ -969,3 +958,22 @@ def add_objective_in_template(request,id):
         template1.objective.add(objective)
         return redirect("objective_template_by_id_url",id=id)
     return render(request, 'employeeapp/add_objective_in_template.html',{"username":username})
+   
+   
+def send_forget_password_mail(email, supervisor_name,username, password):
+    subject = "Welcome to team, test mail for MBO user"
+    message = f'''Hi,
+you are added to {supervisor_name}'s team, following are credential.
+
+Username = {username}
+Password = {password}
+
+Kindly login to this url and reset your password - http://20.10.177.33:8000/login.
+
+Thanks.
+    
+    '''
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = email
+    send_mail(subject, message, email_from, recipient_list)
+    return True
